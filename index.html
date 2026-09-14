@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Premier League Match Predictor - AI-powered predictions based on real statistics, form analysis, and historical data">
+    <meta name="keywords" content="Premier League, football, soccer, predictions, statistics, EPL">
+    <meta name="author" content="Premier League Predictor">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Premier League Match Predictor">
+    <meta property="og:description" content="AI-powered match predictions based on real statistics">
+    <meta property="og:image" content="assets/og-image.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+Pro:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <title>Premier League Match Predictor</title>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <a href="#" class="logo" onclick="App.navigateTo('home'); return false;">
+                    <span class="logo-icon">⚽</span>
+                    <span>PL Predictor</span>
+                </a>
+
+                <nav class="nav">
+                    <a href="#home" class="nav-link active" data-page="home">Home</a>
+                    <a href="#predict" class="nav-link" data-page="predict">Predict</a>
+                    <a href="#standings" class="nav-link" data-page="standings">Standings</a>
+                    <a href="#teams" class="nav-link" data-page="teams">Teams</a>
+                    <a href="#players" class="nav-link" data-page="players">Players</a>
+                    <a href="#h2h" class="nav-link" data-page="h2h">Head to Head</a>
+                    <a href="#fixtures" class="nav-link" data-page="fixtures">Fixtures</a>
+                </nav>
+
+                <div class="header-right">
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text"
+                               id="search-input"
+                               class="search-input"
+                               placeholder="Search teams, players..."
+                               autocomplete="off">
+                        <div id="search-results" class="search-results"></div>
+                    </div>
+
+                    <button id="api-status-btn" class="api-status-btn" onclick="showApiSettings()" title="Data source status">
+                        <span id="api-indicator" class="api-indicator offline">●</span>
+                        <span id="api-label" class="api-label">Mock</span>
+                    </button>
+
+                    <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
+                        ☀
+                    </button>
+
+                    <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle menu">
+                        ☰
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <nav id="mobile-menu" class="mobile-menu">
+                <a href="#home" class="nav-link active" data-page="home">Home</a>
+                <a href="#predict" class="nav-link" data-page="predict">Predict</a>
+                <a href="#standings" class="nav-link" data-page="standings">Standings</a>
+                <a href="#teams" class="nav-link" data-page="teams">Teams</a>
+                <a href="#players" class="nav-link" data-page="players">Players</a>
+                <a href="#h2h" class="nav-link" data-page="h2h">Head to Head</a>
+                <a href="#fixtures" class="nav-link" data-page="fixtures">Fixtures</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content" class="main-content">
+            <!-- Content will be dynamically loaded here -->
+            <div class="loading-spinner"></div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer" style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border-color); margin-top: auto;">
+            <p>Premier League Match Predictor &copy; 2024-2025</p>
+            <p style="margin-top: 0.5rem;">
+                Data for demonstration purposes only.
+                <a href="#" onclick="showApiSettings(); return false;" style="color: var(--accent-primary);">Configure API</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- API Settings Modal -->
+    <div id="api-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: var(--bg-card); padding: 2rem; border-radius: var(--radius-xl); max-width: 500px; width: 90%; border: 1px solid var(--border-color);">
+            <h3 style="margin-bottom: 1rem;">🔗 Live Data Configuration</h3>
+            <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                Enter your Football-Data.org API key to get <strong>live Premier League data</strong> including real standings, fixtures, and scores. Without a key, the app uses realistic mock data.
+            </p>
+            <div id="api-status" style="margin-bottom: 1rem; padding: 0.75rem; border-radius: var(--radius-md); background: var(--bg-elevated);">
+                <!-- Status will be updated by JS -->
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">API Key (X-Auth-Token)</label>
+                <input type="password"
+                       id="api-key-input"
+                       style="width: 100%; padding: 0.75rem 1rem; background: var(--bg-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: 0.95rem;"
+                       placeholder="Enter your Football-Data.org API key">
+            </div>
+            <p style="margin-bottom: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+                📌 Get a <strong>FREE</strong> API key at <a href="https://www.football-data.org/client/register" target="_blank" style="color: var(--accent-primary);">football-data.org/register</a><br>
+                <span style="font-size: 0.75rem;">Free tier: 10 requests/minute, includes Premier League standings, fixtures, and results.</span>
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeApiModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveApiKey()">Save & Refresh</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="data/mock-data.js"></script>
+    <script src="data/expanded-data.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/predictor.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/main.js"></script>
+
+    <!-- API Modal Scripts -->
+    <script>
+        function showApiSettings() {
+            const modal = document.getElementById('api-modal');
+            const input = document.getElementById('api-key-input');
+            const statusDiv = document.getElementById('api-status');
+            const existingKey = localStorage.getItem('footballApiKey');
+
+            if (existingKey) {
+                input.value = existingKey;
+            }
+
+            // Update status display
+            const dataSource = DataAPI.getDataSource();
+            if (dataSource.isLive) {
+                statusDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: var(--success); font-size: 1.2rem;">●</span>
+                        <span><strong>Live Data Active</strong> - Connected to Football-Data.org</span>
+                    </div>
+                `;
+                statusDiv.style.borderLeft = '3px solid var(--success)';
+            } else {
+                statusDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: var(--warning); font-size: 1.2rem;">●</span>
+                        <span><strong>Using Mock Data</strong> - Add API key for live updates</span>
+                    </div>
+                `;
+                statusDiv.style.borderLeft = '3px solid var(--warning)';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeApiModal() {
+            document.getElementById('api-modal').style.display = 'none';
+        }
+
+        async function saveApiKey() {
+            const input = document.getElementById('api-key-input');
+            const key = input.value.trim();
+
+            if (key) {
+                DataAPI.setApiKey(key);
+                DataAPI.clearCache();
+
+                // Show loading
+                const btn = event.target;
+                btn.textContent = 'Connecting...';
+                btn.disabled = true;
+
+                try {
+                    // Test the API connection
+                    await DataAPI.refreshData();
+                    alert('✓ API key saved! Live data is now active.');
+                } catch (e) {
+                    alert('⚠ API key saved but could not verify. Check if the key is correct.');
+                }
+
+                btn.textContent = 'Save & Refresh';
+                btn.disabled = false;
+            } else {
+                localStorage.removeItem('footballApiKey');
+                DataAPI.clearCache();
+                alert('API key removed. Using mock data.');
+            }
+
+            closeApiModal();
+            location.reload(); // Reload to fetch fresh data
+        }
+
+        // Close modal on outside click
+        document.getElementById('api-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeApiModal();
+            }
+        });
+    </script>
+</body>
+</html>
